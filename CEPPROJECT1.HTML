@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cost Estimation Project</title>
+    <link rel="stylesheet" href="CEPPROJECT.CSS" />
+    <script src="CEPPROJECT.JS" defer></script>
+    <body>
+      <div class="container">
+        <h1>Cost Estimation</h1>
+
+        <label for="program_code">Enter Program Code:</label>
+        <textarea
+          id="program_code"
+          placeholder="Paste your code here..."
+        ></textarea>
+        <button onclick="calculateKLOC()">Calculate KLOC</button>
+        <div id="kloc_result" class="result" style="display: none"></div>
+
+        <label for="kloc">Enter KLOC (in thousands):</label>
+        <input type="number" id="kloc" placeholder="e.g., 10" />
+
+        <label for="model_type">Select Model Type:</label>
+        <select id="model_type" onchange="toggleCostDriverFeature()">
+          <option value="basic">Basic Model</option>
+          <option value="intermediate">Intermediate Model</option>
+          <option value="detailed">Detailed Model</option>
+        </select>
+
+        <label for="calculation">Select Calculation Type:</label>
+        <select id="calculation">
+          <option value="effort">Effort</option>
+          <option value="development_time">Development Time</option>
+          <option value="productivity">Productivity</option>
+          <option value="staff_size">Staff Size</option>
+        </select>
+
+        <div
+          id="costDriversContainer"
+          class="cost-drivers"
+          style="display: none"
+        ></div>
+
+        <button onclick="calculate()">Calculate</button>
+        <button class="exit-btn" onclick="exitApplication()">Exit</button>
+
+        <div id="result" class="result" style="display: none"></div>
+      </div>
+
+      <div id="toast" class="toast"></div>
+    </body>
+  </head>
+</html>
