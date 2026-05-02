@@ -3,38 +3,136 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cost Estimation Project</title>
+    <meta
+      name="description"
+      content="A modern software cost estimation dashboard for COCOMO-style effort, time, productivity, and staff planning."
+    />
+    <title>Pulse Estimate | Software Cost Estimation</title>
     <link rel="stylesheet" href="style.CSS" />
-    <script src="CEPPROJECT.JS" defer></script>
-    <body>
-      <div class="container">
-        <h1>Cost Estimation</h1>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="page-shell">
+      <main class="dashboard">
+        <section class="panel input-panel">
+          <div class="section-head">
+            <span class="section-kicker">Workspace</span>
+            <h2>Build your estimate</h2>
+            <p>
+              Start with source lines, refine the model, then run a quick
+              planning scenario.
+            </p>
+          </div>
 
-        <label for="program_code">Enter Program Code:</label>
-        <textarea
-          id="program_code"
-          placeholder="Paste your code here..."
-        ></textarea>
-        <button onclick="calculateKLOC()">Calculate KLOC</button>
-        <div id="kloc_result" class="result" style="display: none"></div>
+          <div class="form-grid">
+            <div class="field field-full">
+              <label for="program_code">Program code</label>
+              <textarea
+                id="program_code"
+                placeholder="Paste your code here..."
+              ></textarea>
+              <div class="field-help">
+                Paste code to calculate KLOC automatically from non-empty lines.
+              </div>
+              <button class="ghost-button" onclick="calculateKLOC()">
+                Calculate KLOC
+              </button>
+              <div
+                id="kloc_result"
+                class="summary-banner"
+                style="display: none"
+              ></div>
+            </div>
 
-        <label for="kloc">Enter KLOC (in thousands):</label>
-        <input type="number" id="kloc" placeholder="e.g., 10" />
+            <div class="field">
+              <label for="kloc">KLOC</label>
+              <input type="number" id="kloc" placeholder="e.g., 10" />
+              <div class="field-help">Enter size in thousands of lines.</div>
+            </div>
 
-        <label for="model_type">Select Model Type:</label>
-        <select id="model_type" onchange="toggleCostDriverFeature()">
-          <option value="basic">Basic Model</option>
-          <option value="intermediate">Intermediate Model</option>
-          <option value="detailed">Detailed Model</option>
-        </select>
+            <div class="field">
+              <label for="model_type">Model type</label>
+              <select id="model_type" onchange="toggleCostDriverFeature()">
+                <option value="basic">Basic Model</option>
+                <option value="intermediate">Intermediate Model</option>
+                <option value="detailed">Detailed Model</option>
+              </select>
+              <div class="field-help">
+                Intermediate mode reveals cost drivers.
+              </div>
+            </div>
 
-        <label for="calculation">Select Calculation Type:</label>
-        <select id="calculation">
-          <option value="effort">Effort</option>
-          <option value="development_time">Development Time</option>
-          <option value="productivity">Productivity</option>
-          <option value="staff_size">Staff Size</option>
-        </select>
+            <div class="field field-full">
+              <label for="calculation">Calculation type</label>
+              <select id="calculation">
+                <option value="effort">Effort</option>
+                <option value="development_time">Development Time</option>
+                <option value="productivity">Productivity</option>
+                <option value="staff_size">Staff Size</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button class="primary-button" onclick="calculate()">
+              Run estimate
+            </button>
+            <button
+              class="exit-btn secondary-button"
+              onclick="exitApplication()"
+            >
+              Close app
+            </button>
+          </div>
+        </section>
+
+        <aside class="panel results-panel">
+          <div class="section-head">
+            <span class="section-kicker">Output</span>
+            <h2>Planning snapshot</h2>
+            <p>
+              Your estimate appears here in a compact, decision-friendly view.
+            </p>
+          </div>
+
+          <div class="result-stack">
+            <div class="summary-banner subtle" id="result-default">
+              Run an estimate to see the active model, mode, and computed
+              result.
+            </div>
+            <div id="result" class="result" style="display: none"></div>
+          </div>
+
+          <div class="insight-grid">
+            <article class="insight-card">
+              <span>Mode selection</span>
+              <strong>Organic, Semidetached, Embedded</strong>
+              <p>Chosen automatically from the KLOC threshold.</p>
+            </article>
+            <article class="insight-card">
+              <span>Intermediate model</span>
+              <strong>Adjustable cost drivers</strong>
+              <p>Multiply effort with environment and project factors.</p>
+            </article>
+          </div>
+        </aside>
+      </main>
+
+      <section class="panel driver-panel">
+        <div class="section-head">
+          <span class="section-kicker">Intermediate model</span>
+          <h2>Cost drivers</h2>
+          <p>
+            Pick one level per driver to calculate the effort adjustment factor.
+          </p>
+        </div>
 
         <div
           id="costDriversContainer"
@@ -42,14 +140,35 @@
           style="display: none"
         ></div>
 
-        <button onclick="calculate()">Calculate</button>
-        <button class="exit-btn" onclick="exitApplication()">Exit</button>
+        <div
+          class="driver-actions"
+          style="margin-top: 12px; display: none"
+          id="driver-actions"
+        >
+          <label
+            for="calculation_driver"
+            style="display: block; font-weight: 600; margin-bottom: 6px"
+            >Calculation</label
+          >
+          <div style="display: flex; gap: 8px; align-items: center">
+            <select id="calculation_driver" style="min-width: 180px">
+              <option value="effort">Effort</option>
+              <option value="development_time">Development Time</option>
+              <option value="productivity">Productivity</option>
+              <option value="staff_size">Staff Size</option>
+            </select>
+            <button class="primary-button" onclick="calculate()">
+              Run estimate
+            </button>
+          </div>
+          <div class="caption" style="margin-top: 8px">
+            Results will appear in the Planning snapshot panel.
+          </div>
+        </div>
+      </section>
+    </div>
 
-        <div id="result" class="result" style="display: none"></div>
-      </div>
-
-      <div id="toast" class="toast"></div>
-      <script src="app.JS"></script>
-    </body>
-  </head>
+    <div id="toast" class="toast"></div>
+    <script src="app.JS"></script>
+  </body>
 </html>

@@ -177,11 +177,47 @@ const costDriverValues = {
       "costDriversContainer"
     );
     costDriversContainer.style.display =
-      modelType === "intermediate" ? "flex" : "none";
+      modelType === "intermediate" ? "grid" : "none";
     if (modelType === "intermediate") {
       renderCostDriverCheckboxes();
     }
   }
+
+  // Ensure the driver panel action controls are shown/hidden and sync selects
+  document.addEventListener("DOMContentLoaded", function () {
+    const modelSelect = document.getElementById("model_type");
+    const driverActions = document.getElementById("driver-actions");
+    const calcMain = document.getElementById("calculation");
+    const calcDriver = document.getElementById("calculation_driver");
+
+    function syncVisibility() {
+      if (modelSelect.value === "intermediate") {
+        driverActions.style.display = "block";
+      } else {
+        driverActions.style.display = "none";
+      }
+    }
+
+    // Initial sync
+    syncVisibility();
+    toggleCostDriverFeature();
+
+    // Sync calculation selects both ways
+    if (calcDriver && calcMain) {
+      calcDriver.value = calcMain.value;
+      calcDriver.addEventListener("change", () => {
+        calcMain.value = calcDriver.value;
+      });
+      calcMain.addEventListener("change", () => {
+        calcDriver.value = calcMain.value;
+      });
+    }
+
+    modelSelect.addEventListener("change", () => {
+      syncVisibility();
+      toggleCostDriverFeature();
+    });
+  });
   // Keep track of the selected state for cost drivers
   const selectedCostDrivers = {};
 
@@ -192,20 +228,26 @@ const costDriverValues = {
     for (const driver in costDriverValues) {
       const driverContainer = document.createElement("div");
       driverContainer.className = "cost-driver";
+      driverContainer.dataset.driver = driver;
 
       const label = document.createElement("label");
       label.textContent = driver;
       driverContainer.appendChild(label);
 
       for (const level in costDriverValues[driver]) {
+        const option = document.createElement("label");
+        option.className = "driver-option";
+
         const radio = document.createElement("input");
         radio.type = "radio";
         radio.name = driver;
         radio.value = costDriverValues[driver][level];
 
-        const radioLabel = document.createElement("label");
-        radioLabel.textContent = `${level} (${costDriverValues[driver][level]})`;
-        radioLabel.style.marginRight = "10px";
+        const optionText = document.createElement("span");
+        optionText.textContent = level;
+
+        const optionValue = document.createElement("strong");
+        optionValue.textContent = costDriverValues[driver][level];
 
         // Handle selection and deselection
         radio.addEventListener("click", function () {
@@ -213,14 +255,18 @@ const costDriverValues = {
           if (selectedCostDrivers[driver] === level) {
             radio.checked = false; // Uncheck the radio button
             selectedCostDrivers[driver] = null; // Clear the selection
+            driverContainer.classList.remove("selected");
           } else {
             // Otherwise, update the selection
             selectedCostDrivers[driver] = level;
+            driverContainer.classList.add("selected");
           }
         });
 
-        driverContainer.appendChild(radio);
-        driverContainer.appendChild(radioLabel);
+        option.appendChild(radio);
+        option.appendChild(optionText);
+        option.appendChild(optionValue);
+        driverContainer.appendChild(option);
       }
 
       container.appendChild(driverContainer);
@@ -239,8 +285,7 @@ const costDriverValues = {
         const selected = driver.querySelector("input:checked");
         if (selected) {
           driver.classList.add("selected");
-          costDrivers[driver.querySelector("label").textContent] =
-            parseFloat(selected.value);
+          costDrivers[driver.dataset.driver] = parseFloat(selected.value);
         }
       });
 
